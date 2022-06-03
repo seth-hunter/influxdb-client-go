@@ -164,10 +164,18 @@ x:
 	w.doneCh <- struct{}{}
 }
 
+func min(a, b uint) uint {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func (w *WriteAPIImpl) flushBuffer() {
 	if len(w.writeBuffer) > 0 {
+		retryInterval := min(w.writeOptions.RetryInterval(), w.writeOptions.MaxRetryInterval())
 		log.Info("sending batch")
-		batch := iwrite.NewBatch(buffer(w.writeBuffer), w.writeOptions.RetryInterval(), w.writeOptions.MaxRetryTime())
+		batch := iwrite.NewBatch(buffer(w.writeBuffer), retryInterval, w.writeOptions.MaxRetryTime())
 		w.writeCh <- batch
 		w.writeBuffer = w.writeBuffer[:0]
 	}
