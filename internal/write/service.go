@@ -111,7 +111,7 @@ func (w *Service) SetBatchErrorCallback(cb BatchErrorCallback) {
 // If writes continues failing and # of attempts reaches maximum or total retry time reaches maxRetryTime,
 // batch is discarded.
 func (w *Service) HandleWrite(ctx context.Context, batch *Batch) error {
-	log.Debug("Write proc: received write request")
+	log.Debugf("Write proc: received write request: %s", batch.Batch)
 	batchToWrite := batch
 	retrying := false
 	for {
