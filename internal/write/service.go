@@ -122,7 +122,12 @@ func (w *Service) HandleWrite(ctx context.Context, batch *Batch) error {
 		default:
 		}
 		if !w.retryQueue.isEmpty() {
-			log.Debug("Write proc: taking batch from retry queue")
+			log.Debugf("Write proc: taking batch from retry queue (len=%d/%d, retries=%d, retryDelay=%.3fs, timeToNextWrite=%.3fs; BATCH: retries=%d/%d, expire = %.3fs)",
+				w.retryQueue.list.Len(), w.retryQueue.limit,
+				w.RetryAttempts, float32(w.RetryDelay)/1e3,
+				time.Until(w.lastWriteAttempt.Add(time.Millisecond*time.Duration(w.RetryDelay))).Seconds(),
+				w.retryQueue.first().RetryAttempts, w.writeOptions.MaxRetries(),
+				time.Until(w.retryQueue.first().Expires).Seconds())
 			if !retrying {
 				b := w.retryQueue.first()
 
